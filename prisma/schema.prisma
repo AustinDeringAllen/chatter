@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -14,16 +11,23 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model ChatRoom {
+    id      String @id @default(cuid())
+    name    String
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
+    userId String
+    createdBy User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    messages Message[]
+}
 
-    @@index([name])
+model Message {
+    id String @id @default(cuid())
+    message String
+
+    userId String
+    createdBy User @relation(fields: [userId], references: [id])
+    roomId String
+    chatRoom ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 }
 
 // Necessary for Next auth
@@ -61,7 +65,9 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+
+    rooms         ChatRoom[]
+    messages      Message[]
 }
 
 model VerificationToken {
